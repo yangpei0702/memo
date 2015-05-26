@@ -4,6 +4,6 @@
         android:id="@+id/save"
         android:orderInCategory="1"
         android:showAsAction="ifRoom|withText"
-        android:title="Save"/>
+        android:title="保存"/>
 
 </menu>

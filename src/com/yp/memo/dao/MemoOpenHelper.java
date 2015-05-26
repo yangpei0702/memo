@@ -13,7 +13,7 @@ public class MemoOpenHelper extends SQLiteOpenHelper{
 			+"memo_remind integer,"
 			+ "remind_date text,"
 			+ "memo_finish integer,"
-			+ "create_date text";
+			+ "create_date text)";
 	//t_resourceΩ®±Ì”Ôæ‰
 	public static final String CREATE_RESOURCE ="create table t_resource("
 			+ "id integer primary key autoincrement,"
@@ -21,7 +21,7 @@ public class MemoOpenHelper extends SQLiteOpenHelper{
 			+ "name text,"
 			+ "file_name text,"
 			+ "file_path text,"
-			+ "create_date text";
+			+ "create_date text)";
 	public MemoOpenHelper(Context context, String name, CursorFactory factory,
 			int version) {
 		super(context, name, factory, version);

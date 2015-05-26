@@ -18,6 +18,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:text="createDate"
+        android:textColor="#009688"
         android:textSize="12sp" />
 
 </LinearLayout>

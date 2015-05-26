@@ -1,6 +1,5 @@
 package com.yp.memo.activity;
 
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
@@ -16,23 +15,32 @@ import com.yp.memo.R;
 import com.yp.memo.dao.MemoDB;
 import com.yp.memo.model.Information;
 
-public class AddActivity extends Activity{
+public class EditActivity extends Activity{
+	private Intent intent;
 	private ActionBar actionBar;
 	private EditText editText;
 	private Button addPicButton;
 	private Button addSoundButton;
 	private Button setRemindButton;
+	private Information info;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add);
+		
 		actionBar = this.getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle("");
-        
+		
+		intent=this.getIntent();
+		info=(Information) intent.getSerializableExtra("info");
+		
+		editText=(EditText)findViewById(R.id.information);
+    	editText.setText(info.getMemoInfo());
+		
+		
 	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// TODO Auto-generated method stub
@@ -52,9 +60,7 @@ public class AddActivity extends Activity{
             startActivity(intent);
             return true;
 		case R.id.save:
-        	editText=(EditText)findViewById(R.id.information);
         	String input=editText.getText().toString();
-        	Information info=new Information();
         	info.setMemoInfo(input);
         	MemoDB m=MemoDB.getInstance(this);
         	int ii=m.saveInformation(info);
@@ -66,6 +72,4 @@ public class AddActivity extends Activity{
         }
 		return super.onOptionsItemSelected(item);
 	}
-	
-	
 }

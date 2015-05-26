@@ -17,6 +17,10 @@ public class InformationAdapter extends BaseAdapter{
 	private List<Information> mList;
 	private LayoutInflater mInflater;
 	
+	
+	
+	public InformationAdapter() {
+	}
 	public InformationAdapter(Context context,List<Information> list){
 		mList=list;
 		mInflater=LayoutInflater.from(context);

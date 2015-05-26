@@ -1,11 +1,16 @@
 package com.yp.memo.model;
 
-import java.text.DateFormat;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class Information {
+public class Information implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public Information() {
 
 	}
@@ -70,14 +75,11 @@ public class Information {
 	}
 
 	public String getCreateDate() {
-		Date date = new Date();
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String createDate = format.format(date);
-		
 		return createDate;
 	}
 
 	public void setCreateDate(String createDate) {
+		
 		this.createDate = createDate;
 	}
 

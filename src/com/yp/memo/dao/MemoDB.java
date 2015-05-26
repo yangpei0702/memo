@@ -7,8 +7,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.yp.memo.model.Information;
+import com.yp.memo.util.CurrentTime;
 
 public class MemoDB {
 	public static final String DB_NAME="memo";
@@ -29,23 +31,27 @@ public class MemoDB {
 	}
 	
 	//添加信息
-	public void saveInformation(Information information){
+	public int saveInformation(Information information){
 		if(information!=null){
 			ContentValues values=new ContentValues();
 			values.put("memo_info", information.getMemoInfo());
 			values.put("memo_remind", information.getMemoRemind());
 			values.put("remind_date", information.getRemindDate());
 			values.put("memo_finish", information.getMemoFinish());
-			values.put("create_date", information.getCreateDate());
-			db.insert("t_information", null, values);
+			values.put("create_date", CurrentTime.getCurrentDate());
+			int i =(int) db.insert("t_information", null, values);
+			Log.d("ok", "sssss");
+		return i;
+			
 		}
+		return -1;
 	}
 	
 	//读取所有信息
 	public List<Information> loadProvinces(){
 		List<Information> list =new ArrayList<Information>();
 		Cursor cursor=db
-				.query("t_information", null, null, null, null, null, null);
+				.query("t_information", null, null, null, null, null, "id desc");
 		if(cursor.moveToFirst()){
 			do{
 				Information info =new Information();
@@ -55,8 +61,22 @@ public class MemoDB {
 				info.setRemindDate(cursor.getString(cursor.getColumnIndex("remind_date")));
 				info.setMemoFinish(cursor.getInt(cursor.getColumnIndex("memo_finish")));
 				info.setCreateDate(cursor.getString(cursor.getColumnIndex("create_date")));
+				list.add(info);
 			}while(cursor.moveToNext());
 		}
 		return list;
+	}
+	//删除一条信息
+	public void deleteInformation(Information information){
+		int id=information.getId();
+		String sid=String.valueOf(id);
+		db.execSQL("delete from t_information where id=?",new String[]{sid});
+	}
+	
+	//更新一条信息
+	public 
+	//关闭数据库连接
+	public void closeDB(){
+		db.close();
 	}
 }
