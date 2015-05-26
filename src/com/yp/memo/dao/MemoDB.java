@@ -74,7 +74,23 @@ public class MemoDB {
 	}
 	
 	//更新一条信息
-	public 
+	public int updateInformation(Information information){
+		int id=information.getId();
+		String sid=String.valueOf(id);
+		
+		ContentValues values=new ContentValues();
+		
+		values.put("memo_info", information.getMemoInfo());
+		values.put("memo_remind", information.getMemoRemind());
+		values.put("remind_date", information.getRemindDate());
+		values.put("memo_finish", information.getMemoFinish());
+		values.put("create_date", information.getCreateDate());
+		
+		
+		int p=db.update("t_information", values, "id=?", new String[]{sid});
+		return p;
+		
+	}
 	//关闭数据库连接
 	public void closeDB(){
 		db.close();

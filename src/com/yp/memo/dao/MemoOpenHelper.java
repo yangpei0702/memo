@@ -22,6 +22,13 @@ public class MemoOpenHelper extends SQLiteOpenHelper{
 			+ "file_name text,"
 			+ "file_path text,"
 			+ "create_date text)";
+	//t_info_resourceΩ®±Ì”Ôæ‰
+	public static final String CREATE_INFO_RESOURCE="create table t_info_resource("
+			+ "id integer primary key autoincrement,"
+			+ "memo_id integer,"
+			+ "resource_id integer";
+			
+			
 	public MemoOpenHelper(Context context, String name, CursorFactory factory,
 			int version) {
 		super(context, name, factory, version);

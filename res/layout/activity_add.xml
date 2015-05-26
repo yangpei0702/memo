@@ -35,10 +35,15 @@
     <EditText
         android:id="@+id/information"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="start"
         android:gravity="start"
         android:hint="请输入内容"
         android:inputType="text" />
-
+    
+    <ImageView 
+        android:id="@+id/picImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+	
 </LinearLayout>

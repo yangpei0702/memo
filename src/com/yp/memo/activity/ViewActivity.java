@@ -54,8 +54,8 @@ public class ViewActivity extends Activity implements OnClickListener{
         {
         case android.R.id.home:
             Intent intent = new Intent(this, MainActivity.class);
-/*            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-*/            startActivity(intent);
+            startActivity(intent);
+            finish();
             return true;
         default:
             
@@ -80,7 +80,7 @@ public class ViewActivity extends Activity implements OnClickListener{
     		bundle.putSerializable("info", info);
     		intent.putExtras(bundle);
     		ViewActivity.this.startActivity(intent);
-			
+			finish();
 			
 			break;
 		}

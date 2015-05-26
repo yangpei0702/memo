@@ -58,13 +58,14 @@ public class EditActivity extends Activity{
         case android.R.id.home:
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+            finish();
             return true;
 		case R.id.save:
         	String input=editText.getText().toString();
         	info.setMemoInfo(input);
         	MemoDB m=MemoDB.getInstance(this);
-        	int ii=m.saveInformation(info);
-        	Log.d("position", ""+ii);
+        	int p=m.updateInformation(info);
+        	Log.d("position", ""+p);
         	finish();
         	
         default:

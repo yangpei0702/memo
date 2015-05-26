@@ -70,7 +70,9 @@ public class MainActivity extends Activity{
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		
 		m.closeDB();
+		finish();
 	}
 	
 	public void initListView(){
