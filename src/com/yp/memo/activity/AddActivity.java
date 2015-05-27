@@ -3,6 +3,8 @@ package com.yp.memo.activity;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import android.app.ActionBar;
@@ -27,6 +29,7 @@ import android.widget.ImageView;
 import com.yp.memo.R;
 import com.yp.memo.dao.MemoDB;
 import com.yp.memo.model.Information;
+import com.yp.memo.model.Resource;
 import com.yp.memo.util.CurrentTime;
 
 public class AddActivity extends Activity implements OnClickListener{
@@ -40,6 +43,9 @@ public class AddActivity extends Activity implements OnClickListener{
 	private ImageView picture;
 	private Uri imageUri;
 	private String mPhotoPath;
+	private String picFileName;
+	private String mAudioPath;
+	private String audioFileName;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -83,10 +89,27 @@ public class AddActivity extends Activity implements OnClickListener{
 		case R.id.save:
         	editText=(EditText)findViewById(R.id.information);
         	String input=editText.getText().toString();
+        	
+        	
         	Information info=new Information();
+        	List<Resource> list= new ArrayList<Resource>();
+        	
+        	Resource resource=new Resource();
+        	
+        	
+        	
         	info.setMemoInfo(input);
+        	
+        	if(mPhotoPath!=null&&mPhotoPath!=""){
+        		resource.setFileName(picFileName);
+            	resource.setFilePath(mPhotoPath);
+            	list.add(resource);
+        	}
+        	
+        	
+        	
         	MemoDB m=MemoDB.getInstance(this);
-        	int ii=m.saveInformation(info);
+        	int ii=m.saveInformation(info,list);
         	Log.d("position", ""+ii);
         	finish();
         	
@@ -101,9 +124,8 @@ public class AddActivity extends Activity implements OnClickListener{
 		// TODO Auto-generated method stub
 		switch(v.getId()){
 		case R.id.addPic:
-			/*Random random = new Random();Environment
-			.getExternalStorageDirectory(), "Image"+random.nextInt(1000065)+".jpg"*/
-			mPhotoPath = "mnt/sdcard/DCIM/Camera/" + CurrentTime.getPhotoFileName();
+			picFileName=CurrentTime.getPhotoFileName();
+			mPhotoPath = "mnt/sdcard/DCIM/Camera/" + picFileName;
 			File outputImage = new File(mPhotoPath);
 			try {
 				if (outputImage.exists()) {

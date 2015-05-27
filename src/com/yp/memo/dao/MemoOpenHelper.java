@@ -26,7 +26,7 @@ public class MemoOpenHelper extends SQLiteOpenHelper{
 	public static final String CREATE_INFO_RESOURCE="create table t_info_resource("
 			+ "id integer primary key autoincrement,"
 			+ "memo_id integer,"
-			+ "resource_id integer";
+			+ "resource_id integer)";
 			
 			
 	public MemoOpenHelper(Context context, String name, CursorFactory factory,
@@ -45,7 +45,7 @@ public class MemoOpenHelper extends SQLiteOpenHelper{
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// TODO Auto-generated method stub
-		
+		db.execSQL(CREATE_INFO_RESOURCE);
 	}
 
 }

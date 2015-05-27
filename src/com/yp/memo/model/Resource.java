@@ -1,6 +1,12 @@
 package com.yp.memo.model;
 
-public class Resource {
+import java.io.Serializable;
+
+public class Resource implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public Resource(){
 		
 	}
