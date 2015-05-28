@@ -3,12 +3,16 @@ package com.yp.memo.activity;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,15 +33,18 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.yp.memo.R;
+import com.yp.memo.broadcastreceiver.AlarmReceiver;
 import com.yp.memo.dao.MemoDB;
 import com.yp.memo.model.Information;
 import com.yp.memo.model.Resource;
+import com.yp.memo.model.TimeInfo;
 import com.yp.memo.util.CurrentTime;
 
 public class AddActivity extends Activity implements OnClickListener {
 	public static final int TAKE_PHOTO = 1;
 	public static final int CROP_PHOTO = 2;
 	public static final int TAKE_AUDIO = 3;
+	public static final int TAKE_Remind_Time=4;
 	private ActionBar actionBar;
 	private EditText editText;
 	private Button addPicButton;
@@ -52,7 +59,9 @@ public class AddActivity extends Activity implements OnClickListener {
 	private Button playAudio;
 	private Button stopAudio;
 	private MediaPlayer mPlayer = null;
-
+	private TimeInfo timeInfo;
+	private Information info;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -76,6 +85,8 @@ public class AddActivity extends Activity implements OnClickListener {
 		setRemindButton.setOnClickListener(this);
 		playAudio.setOnClickListener(this);
 		stopAudio.setOnClickListener(this);
+		
+		info = new Information();
 	}
 
 	@Override
@@ -99,7 +110,7 @@ public class AddActivity extends Activity implements OnClickListener {
 		case R.id.save:
 			editText = (EditText) findViewById(R.id.information);
 			String input = editText.getText().toString();
-			Information info = new Information();
+			
 			info.setMemoInfo(input);
 
 			List<Resource> list = new ArrayList<Resource>();
@@ -155,6 +166,10 @@ public class AddActivity extends Activity implements OnClickListener {
 			Intent intentAudio = new Intent(this, RecordActivity.class);
 			intentAudio.putExtra("Path", mAudioPath);
 			startActivityForResult(intentAudio, TAKE_AUDIO);// 启动相机程序
+			break;
+		case R.id.setRemind:
+			Intent calendarIntent =new Intent(this,CalendarActivity.class);
+			startActivityForResult(calendarIntent, TAKE_Remind_Time);
 			break;
 		case R.id.playAudio:
 			try {
@@ -219,9 +234,38 @@ public class AddActivity extends Activity implements OnClickListener {
 				Log.d("message", "声音未录制");
 			}
 			break;
+		case TAKE_Remind_Time:
+			timeInfo=new TimeInfo();
+			timeInfo=(TimeInfo) data.getSerializableExtra("timeInfo");
+			setReminder(true);
 		default:
 			break;
 		}
 	}
+	
+	
+	private void setReminder(boolean b) {  
+		Calendar c=Calendar.getInstance();  
+        c.set(timeInfo.getmYear(), timeInfo.getmMonth(), timeInfo.getmDay(), timeInfo.getmHour(), timeInfo.getmMinute(), timeInfo.getmSecond());
+        SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String remindTime=df.format(c.getTime());
+        info.setRemindDate(remindTime);
+        // get the AlarmManager instance   
+        AlarmManager am= (AlarmManager) getSystemService(ALARM_SERVICE);  
+        // create a PendingIntent that will perform a broadcast  
+        Intent remindIntent= new Intent(this,AlarmReceiver.class);
+        
+        PendingIntent pi= PendingIntent.getBroadcast(AddActivity.this, 0, remindIntent, 0);  
+          
+        if(b){  
+            // schedule an alarm  
+            am.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pi);  
+        }  
+        else{  
+            // cancel current alarm  
+            am.cancel(pi);  
+        }  
+          
+    }  
 
 }

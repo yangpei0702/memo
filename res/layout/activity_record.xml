@@ -6,19 +6,19 @@
 
     <Button
         android:id="@+id/startRecord"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="开始录音" />
 
     <Button
         android:id="@+id/stopRecord"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="停止录音" />
 
     <Button
         android:id="@+id/saveFile"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" 
         android:text="保存"/>
 

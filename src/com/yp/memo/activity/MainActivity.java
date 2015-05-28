@@ -78,7 +78,7 @@ public class MainActivity extends Activity {
 		m = MemoDB.getInstance(this);
 		list = m.loadProvinces();
 		lv = (ListView) findViewById(R.id.lv_main);
-
+		lv.setDivider(null);
 		listAdapter = new InformationAdapter(this, list);
 		lv.setAdapter(listAdapter);
 
