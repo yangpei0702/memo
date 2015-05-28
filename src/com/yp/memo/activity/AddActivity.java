@@ -12,7 +12,9 @@ import java.util.Random;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -44,7 +46,7 @@ public class AddActivity extends Activity implements OnClickListener {
 	public static final int TAKE_PHOTO = 1;
 	public static final int CROP_PHOTO = 2;
 	public static final int TAKE_AUDIO = 3;
-	public static final int TAKE_Remind_Time=4;
+	public static final int TAKE_Remind_Time = 4;
 	private ActionBar actionBar;
 	private EditText editText;
 	private Button addPicButton;
@@ -61,7 +63,8 @@ public class AddActivity extends Activity implements OnClickListener {
 	private MediaPlayer mPlayer = null;
 	private TimeInfo timeInfo;
 	private Information info;
-	
+	private Resource resource;
+	private List<Resource> list;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -73,19 +76,20 @@ public class AddActivity extends Activity implements OnClickListener {
 
 		addPicButton = (Button) findViewById(R.id.addPic);
 		addSoundButton = (Button) findViewById(R.id.addSound);
-		setRemindButton = (Button) findViewById(R.id.setRemind);
+		//setRemindButton = (Button) findViewById(R.id.setRemind);
 		picture = (ImageView) findViewById(R.id.picImage);
 		playAudio = (Button) findViewById(R.id.playAudio);
 		playAudio.setVisibility(View.GONE);
 		stopAudio = (Button) findViewById(R.id.stopAudio);
 		stopAudio.setVisibility(View.GONE);
-
+		editText = (EditText) findViewById(R.id.information);
+		
 		addPicButton.setOnClickListener(this);
 		addSoundButton.setOnClickListener(this);
 		setRemindButton.setOnClickListener(this);
 		playAudio.setOnClickListener(this);
 		stopAudio.setOnClickListener(this);
-		
+
 		info = new Information();
 	}
 
@@ -108,28 +112,65 @@ public class AddActivity extends Activity implements OnClickListener {
 			finish();
 			return true;
 		case R.id.save:
-			editText = (EditText) findViewById(R.id.information);
-			String input = editText.getText().toString();
 			
-			info.setMemoInfo(input);
+			
+			
+			
+			AlertDialog.Builder dialog = new AlertDialog.Builder(
+					AddActivity.this);
+			dialog.setTitle("提示");
+			dialog.setMessage("是否添加提醒？");
+			dialog.setCancelable(false);
+			dialog.setPositiveButton("是",
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							String input = editText.getText().toString();
+							info.setMemoInfo(input);
+							list = new ArrayList<Resource>();
+							resource = new Resource();
+							if (mPhotoPath != null && mPhotoPath != "") {
+								resource.setFileName(picFileName);
+								resource.setFilePath(mPhotoPath);
+								list.add(resource);
+							}
+							if (mAudioPath != null && mAudioPath != "") {
+								resource.setFileName(audioFileName);
+								resource.setFilePath(mAudioPath);
+								list.add(resource);
+							}
 
-			List<Resource> list = new ArrayList<Resource>();
-			Resource resource = new Resource();
-			if (mPhotoPath != null && mPhotoPath != "") {
-				resource.setFileName(picFileName);
-				resource.setFilePath(mPhotoPath);
-				list.add(resource);
-			}
-			if (mAudioPath != null && mAudioPath != "") {
-				resource.setFileName(audioFileName);
-				resource.setFilePath(mAudioPath);
-				list.add(resource);
-			}
+							Intent calendarIntent = new Intent(AddActivity.this, CalendarActivity.class);
+							startActivityForResult(calendarIntent, TAKE_Remind_Time);
+						}
+					});
+			dialog.setNegativeButton("否",
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							String input = editText.getText().toString();
+							info.setMemoInfo(input);
+							list = new ArrayList<Resource>();
+							resource = new Resource();
+							if (mPhotoPath != null && mPhotoPath != "") {
+								resource.setFileName(picFileName);
+								resource.setFilePath(mPhotoPath);
+								list.add(resource);
+							}
+							if (mAudioPath != null && mAudioPath != "") {
+								resource.setFileName(audioFileName);
+								resource.setFilePath(mAudioPath);
+								list.add(resource);
+							}
+						}
+					});
+			dialog.show();
 
 			MemoDB m = MemoDB.getInstance(this);
 			int ii = m.saveInformation(info, list);
 			Log.d("position", "" + ii);
 			finish();
+			
 
 		default:
 
@@ -167,10 +208,9 @@ public class AddActivity extends Activity implements OnClickListener {
 			intentAudio.putExtra("Path", mAudioPath);
 			startActivityForResult(intentAudio, TAKE_AUDIO);// 启动相机程序
 			break;
-		case R.id.setRemind:
-			Intent calendarIntent =new Intent(this,CalendarActivity.class);
-			startActivityForResult(calendarIntent, TAKE_Remind_Time);
-			break;
+		/*case R.id.setRemind:
+			
+			break;*/
 		case R.id.playAudio:
 			try {
 				mPlayer = new MediaPlayer();
@@ -235,37 +275,40 @@ public class AddActivity extends Activity implements OnClickListener {
 			}
 			break;
 		case TAKE_Remind_Time:
-			timeInfo=new TimeInfo();
-			timeInfo=(TimeInfo) data.getSerializableExtra("timeInfo");
+			timeInfo = new TimeInfo();
+			timeInfo = (TimeInfo) data.getSerializableExtra("timeInfo");
 			setReminder(true);
 		default:
 			break;
 		}
 	}
-	
-	
-	private void setReminder(boolean b) {  
-		Calendar c=Calendar.getInstance();  
-        c.set(timeInfo.getmYear(), timeInfo.getmMonth(), timeInfo.getmDay(), timeInfo.getmHour(), timeInfo.getmMinute(), timeInfo.getmSecond());
-        SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String remindTime=df.format(c.getTime());
-        info.setRemindDate(remindTime);
-        // get the AlarmManager instance   
-        AlarmManager am= (AlarmManager) getSystemService(ALARM_SERVICE);  
-        // create a PendingIntent that will perform a broadcast  
-        Intent remindIntent= new Intent(this,AlarmReceiver.class);
-        
-        PendingIntent pi= PendingIntent.getBroadcast(AddActivity.this, 0, remindIntent, 0);  
-          
-        if(b){  
-            // schedule an alarm  
-            am.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pi);  
-        }  
-        else{  
-            // cancel current alarm  
-            am.cancel(pi);  
-        }  
-          
-    }  
+
+	private void setReminder(boolean b) {
+		Calendar c = Calendar.getInstance();
+		c.set(timeInfo.getmYear(), timeInfo.getmMonth(), timeInfo.getmDay(),
+				timeInfo.getmHour(), timeInfo.getmMinute(),
+				timeInfo.getmSecond());
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		String remindTime = df.format(c.getTime());
+		info.setRemindDate(remindTime);
+		// get the AlarmManager instance
+		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+		// create a PendingIntent that will perform a broadcast
+		Intent remindIntent = new Intent(this, AlarmReceiver.class);
+		Bundle bundle = new Bundle();
+		bundle.putSerializable("info", info);
+		remindIntent.putExtras(bundle);
+		PendingIntent pi = PendingIntent.getBroadcast(AddActivity.this, 0,
+				remindIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+		if (b) {
+			// schedule an alarm
+			am.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pi);
+		} else {
+			// cancel current alarm
+			am.cancel(pi);
+		}
+
+	}
 
 }
