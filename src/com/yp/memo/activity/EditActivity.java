@@ -28,7 +28,7 @@ import com.yp.memo.model.Information;
 import com.yp.memo.model.Resource;
 import com.yp.memo.util.CurrentTime;
 
-public class EditActivity extends Activity implements OnClickListener{
+public class EditActivity extends Activity implements OnClickListener {
 	public static final int TAKE_PHOTO = 1;
 	public static final int CROP_PHOTO = 2;
 	private Intent intent;
@@ -40,11 +40,12 @@ public class EditActivity extends Activity implements OnClickListener{
 	private Information info;
 	private Resource resource;
 	private List<Resource> list;
-	private String mPhotoPath;
+	private String mPhotoPath = "";
+	private String newPhotoPath = "";
 	private ImageView imageView;
 	private String picFileName;
 	private Uri imageUri;
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,23 +56,26 @@ public class EditActivity extends Activity implements OnClickListener{
 		actionBar = this.getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setTitle("");
-		
-		resource=new Resource();
-		
-		imageView=(ImageView) findViewById(R.id.picImage);
-		addPicButton=(Button) findViewById(R.id.addPic);
+
+		resource = new Resource();
+
+		imageView = (ImageView) findViewById(R.id.picImage);
+		addPicButton = (Button) findViewById(R.id.addPic);
 		addPicButton.setOnClickListener(this);
 
 		intent = this.getIntent();
 		info = (Information) intent.getSerializableExtra("info");
 		list = (List<Resource>) intent.getSerializableExtra("resourceList");
-		if (list != null&&list.size()!=0) {
+
+		if (list != null && list.size() != 0) {
 			addPicButton.setText("修改图片");
 			resource = list.get(0);
 			mPhotoPath = resource.getFilePath();
+			newPhotoPath = mPhotoPath;
 			Bitmap bitmap = BitmapFactory.decodeFile(mPhotoPath, null);
 			imageView.setImageBitmap(bitmap);
 		}
+
 		editText = (EditText) findViewById(R.id.information);
 		editText.setText(info.getMemoInfo());
 
@@ -99,19 +103,18 @@ public class EditActivity extends Activity implements OnClickListener{
 			String input = editText.getText().toString().trim();
 			info.setMemoInfo(input);
 			MemoDB m = MemoDB.getInstance(this);
-			
-			if(mPhotoPath!=null&&mPhotoPath!=""){
+
+			if (!newPhotoPath.equals(mPhotoPath)) {
+
 				resource.setFileName(picFileName);
-				
-				resource.setFilePath(mPhotoPath);
-				
+
+				resource.setFilePath(newPhotoPath);
+
 				list.add(resource);
 			}
-			
-			
-			
-			int p = m.updateInformation(info,list);
-			
+
+			int p = m.updateInformation(info, list);
+
 			Log.d("position", "" + p);
 			finish();
 
@@ -124,12 +127,12 @@ public class EditActivity extends Activity implements OnClickListener{
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
-		switch(v.getId()){
+		switch (v.getId()) {
 		case R.id.addPic:
-			picFileName=CurrentTime.getPhotoFileName();
-			
-			mPhotoPath = "mnt/sdcard/DCIM/Camera/" + picFileName;
-			
+			picFileName = CurrentTime.getPhotoFileName();
+
+			newPhotoPath = "mnt/sdcard/DCIM/Camera/" + picFileName;
+
 			File outputImage = new File(mPhotoPath);
 			try {
 				if (outputImage.exists()) {
@@ -147,9 +150,9 @@ public class EditActivity extends Activity implements OnClickListener{
 			startActivityForResult(intent, TAKE_PHOTO);// 启动相机程序
 			break;
 		}
-		
+
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Auto-generated method stub

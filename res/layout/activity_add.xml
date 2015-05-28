@@ -40,7 +40,18 @@
         android:gravity="start"
         android:hint="请输入内容"
         android:inputType="text" />
-    
+    <Button 
+	    android:id="@+id/playAudio"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="播放"
+	    />
+    <Button 
+	    android:id="@+id/stopAudio"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="停止"
+	    />
     <ImageView 
         android:id="@+id/picImage"
         android:layout_width="match_parent"

@@ -17,4 +17,11 @@ public class CurrentTime {
 				"'IMG'_yyyyMMdd_HHmmss");
 		return dateFormat.format(date) + ".jpg";
 	}
+
+	public static String getAudioFileName() {
+		Date date = new Date(System.currentTimeMillis());
+		SimpleDateFormat dateFormat = new SimpleDateFormat(
+				"'AudioRecord'_yyyyMMdd_HHmmss");
+		return dateFormat.format(date) + ".3gp";
+	}
 }

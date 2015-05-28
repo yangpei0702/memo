@@ -1,8 +1,8 @@
 package com.yp.memo.activity;
 
-
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,6 +12,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -32,9 +34,10 @@ import com.yp.memo.model.Information;
 import com.yp.memo.model.Resource;
 import com.yp.memo.util.CurrentTime;
 
-public class AddActivity extends Activity implements OnClickListener{
+public class AddActivity extends Activity implements OnClickListener {
 	public static final int TAKE_PHOTO = 1;
 	public static final int CROP_PHOTO = 2;
+	public static final int TAKE_AUDIO = 3;
 	private ActionBar actionBar;
 	private EditText editText;
 	private Button addPicButton;
@@ -46,85 +49,89 @@ public class AddActivity extends Activity implements OnClickListener{
 	private String picFileName;
 	private String mAudioPath;
 	private String audioFileName;
+	private Button playAudio;
+	private Button stopAudio;
+	private MediaPlayer mPlayer = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add);
 		actionBar = this.getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle("");
-        
-        addPicButton=(Button) findViewById(R.id.addPic);
-        addSoundButton=(Button) findViewById(R.id.addSound);
-        setRemindButton=(Button) findViewById(R.id.setRemind);
-        picture=(ImageView) findViewById(R.id.picImage);
-        
-        addPicButton.setOnClickListener(this);
-        addSoundButton.setOnClickListener(this);
-        setRemindButton.setOnClickListener(this);
-        
-        
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setTitle("");
+
+		addPicButton = (Button) findViewById(R.id.addPic);
+		addSoundButton = (Button) findViewById(R.id.addSound);
+		setRemindButton = (Button) findViewById(R.id.setRemind);
+		picture = (ImageView) findViewById(R.id.picImage);
+		playAudio = (Button) findViewById(R.id.playAudio);
+		playAudio.setVisibility(View.GONE);
+		stopAudio = (Button) findViewById(R.id.stopAudio);
+		stopAudio.setVisibility(View.GONE);
+
+		addPicButton.setOnClickListener(this);
+		addSoundButton.setOnClickListener(this);
+		setRemindButton.setOnClickListener(this);
+		playAudio.setOnClickListener(this);
+		stopAudio.setOnClickListener(this);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// TODO Auto-generated method stub
 		getMenuInflater().inflate(R.menu.add_memu, menu);
-		MenuInflater inflater=getMenuInflater();
-        inflater.inflate(R.menu.add_memus, menu);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.add_memus, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
-		switch (item.getItemId())
-        {
-        case android.R.id.home:
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
-            return true;
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			Intent intent = new Intent(this, MainActivity.class);
+			startActivity(intent);
+			finish();
+			return true;
 		case R.id.save:
-        	editText=(EditText)findViewById(R.id.information);
-        	String input=editText.getText().toString();
-        	
-        	
-        	Information info=new Information();
-        	List<Resource> list= new ArrayList<Resource>();
-        	
-        	Resource resource=new Resource();
-        	
-        	
-        	
-        	info.setMemoInfo(input);
-        	
-        	if(mPhotoPath!=null&&mPhotoPath!=""){
-        		resource.setFileName(picFileName);
-            	resource.setFilePath(mPhotoPath);
-            	list.add(resource);
-        	}
-        	
-        	
-        	
-        	MemoDB m=MemoDB.getInstance(this);
-        	int ii=m.saveInformation(info,list);
-        	Log.d("position", ""+ii);
-        	finish();
-        	
-        default:
-            
-        }
+			editText = (EditText) findViewById(R.id.information);
+			String input = editText.getText().toString();
+			Information info = new Information();
+			info.setMemoInfo(input);
+
+			List<Resource> list = new ArrayList<Resource>();
+			Resource resource = new Resource();
+			if (mPhotoPath != null && mPhotoPath != "") {
+				resource.setFileName(picFileName);
+				resource.setFilePath(mPhotoPath);
+				list.add(resource);
+			}
+			if (mAudioPath != null && mAudioPath != "") {
+				resource.setFileName(audioFileName);
+				resource.setFilePath(mAudioPath);
+				list.add(resource);
+			}
+
+			MemoDB m = MemoDB.getInstance(this);
+			int ii = m.saveInformation(info, list);
+			Log.d("position", "" + ii);
+			finish();
+
+		default:
+
+		}
 		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
-		switch(v.getId()){
+		switch (v.getId()) {
 		case R.id.addPic:
-			picFileName=CurrentTime.getPhotoFileName();
+			picFileName = CurrentTime.getPhotoFileName();
 			mPhotoPath = "mnt/sdcard/DCIM/Camera/" + picFileName;
 			File outputImage = new File(mPhotoPath);
 			try {
@@ -141,12 +148,42 @@ public class AddActivity extends Activity implements OnClickListener{
 			Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
 			intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
 			startActivityForResult(intent, TAKE_PHOTO);// 启动相机程序
-		break;
-		
+			break;
+		case R.id.addSound:
+			audioFileName = CurrentTime.getAudioFileName();
+			mAudioPath = "mnt/sdcard/Music/" + audioFileName;
+			Intent intentAudio = new Intent(this, RecordActivity.class);
+			intentAudio.putExtra("Path", mAudioPath);
+			startActivityForResult(intentAudio, TAKE_AUDIO);// 启动相机程序
+			break;
+		case R.id.playAudio:
+			try {
+				mPlayer = new MediaPlayer();
+				mPlayer.setDataSource(mAudioPath);
+				mPlayer.prepare();
+				mPlayer.start();
+				playAudio.setText("播放中");
+				mPlayer.setOnCompletionListener(new OnCompletionListener() {
+					@Override
+					public void onCompletion(MediaPlayer mPlayer) {
+						playAudio.setText("播放");
+						mPlayer.release();
+						mPlayer = null;
+					}
+				});
+			} catch (IOException e) {
+				Log.e("LOG_TAG", "播放失败", e);
+			}
+
+			break;
+		case R.id.stopAudio:
+			mPlayer.release();
+			mPlayer = null;
+			break;
 		}
+
 	}
-	
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Auto-generated method stub
@@ -173,9 +210,18 @@ public class AddActivity extends Activity implements OnClickListener{
 				}
 			}
 			break;
+		case TAKE_AUDIO:
+			if (data.getStringExtra("result").equals("OK")) {
+				// mPlayer = new MediaPlayer();
+				playAudio.setVisibility(View.VISIBLE);
+				stopAudio.setVisibility(View.VISIBLE);
+			} else {
+				Log.d("message", "声音未录制");
+			}
+			break;
 		default:
 			break;
 		}
 	}
-	
+
 }

@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-
-public class Information implements Serializable{
+public class Information implements Serializable {
 	/**
 	 * 
 	 */
@@ -23,7 +22,7 @@ public class Information implements Serializable{
 		this.memoRemind = memoRemind;
 		this.remindDate = remindDate;
 		this.memoFinish = memoFinish;
-		
+
 		this.createDate = createDate;
 	}
 
@@ -79,7 +78,7 @@ public class Information implements Serializable{
 	}
 
 	public void setCreateDate(String createDate) {
-		
+
 		this.createDate = createDate;
 	}
 

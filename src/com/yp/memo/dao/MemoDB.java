@@ -38,46 +38,51 @@ public class MemoDB {
 			int i = 0;
 			int memoId = 0;
 			int resourceId = 0;
-			ContentValues infoValues = new ContentValues();
-			Resource resource = new Resource();
-			ContentValues resourceValues = new ContentValues();
 
+			// 将文字信息填入到infoValues
+			ContentValues infoValues = new ContentValues();
 			infoValues.put("memo_info", information.getMemoInfo());
 			infoValues.put("memo_remind", information.getMemoRemind());
 			infoValues.put("remind_date", information.getRemindDate());
 			infoValues.put("memo_finish", information.getMemoFinish());
 			infoValues.put("create_date", CurrentTime.getCurrentDate());
 
-			db.beginTransaction(); // 开始事务
+			Resource resource = new Resource();
+			ContentValues resourceValues = new ContentValues();
 
+			db.beginTransaction(); // 开始事务
 			try {
+
 				// 文字信息添加
 				i = (int) db.insert("t_information", null, infoValues);
+				Log.d("print", "" + i);
 				Cursor cursor = db.rawQuery(
 						"select max(id) as id from t_information ", null);
 				if (cursor.moveToLast()) {
 					memoId = cursor.getInt(cursor.getColumnIndex("id"));
-
 				}
 				String mId = String.valueOf(memoId);
-				
-				if(list!=null&&list.size()!=0){
-				// 获取资源第一条数据进行添加
-				resource = list.get(0);
-				resourceValues.put("file_name", resource.getFileName());
-				resourceValues.put("file_path", resource.getFilePath());
-				int k = (int) db.insert("t_resource", null, resourceValues);
-				Log.d("print", "" + k);
-				cursor = db.rawQuery("select max(id) as id from t_resource ",
-						null);
-				if (cursor.moveToLast()) {
-					resourceId = cursor.getInt(cursor.getColumnIndex("id"));
 
-				}
-				String rId = String.valueOf(resourceId);
-				db.execSQL(
-						"insert into t_info_resource (memo_id,resource_id) values (?,?)",
-						new String[] { mId, rId });
+				// 资源添加
+				if (list != null && list.size() != 0) {
+					for (int j = 0; j < list.size(); j++) {
+						resource = list.get(j);
+						resourceValues.put("file_name", resource.getFileName());
+						resourceValues.put("file_path", resource.getFilePath());
+						int k = (int) db.insert("t_resource", null,
+								resourceValues);
+						Log.d("print", "" + k);
+						cursor = db.rawQuery(
+								"select max(id) as id from t_resource ", null);
+						if (cursor.moveToLast()) {
+							resourceId = cursor.getInt(cursor
+									.getColumnIndex("id"));
+						}
+						String rId = String.valueOf(resourceId);
+						db.execSQL(
+								"insert into t_info_resource (memo_id,resource_id) values (?,?)",
+								new String[] { mId, rId });
+					}
 				}
 				db.setTransactionSuccessful(); // 设置事务成功完成
 			} catch (Exception e) {
@@ -86,32 +91,36 @@ public class MemoDB {
 				db.endTransaction(); // 结束事务
 			}
 
-			return i;
+			return 1;
 
 		}
-		return -1;
+		return 0;
 	}
 
 	// 根据id查看一条信息
 	public List<Resource> loadResources(int id) {
 		String memo_id = String.valueOf(id).trim();
 		List<Resource> list = new ArrayList<Resource>();
-	
-		Cursor cursor = db.rawQuery("select * from t_info_resource where memo_id=?", new String[] { memo_id });
+
+		Cursor cursor = db.rawQuery(
+				"select * from t_info_resource where memo_id=?",
+				new String[] { memo_id });
 		if (cursor.getCount() != 0) {
 			if (cursor.moveToFirst()) {
 				do {
 					Resource resource = new Resource();
-					String  resource_id=String.valueOf(cursor.getInt(cursor.getColumnIndex("resource_id")));
-					
-				
-					Cursor cursorR = db.rawQuery("select * from t_resource where id=?", new String[] { resource_id });
-					if (cursorR.moveToLast()){
-					resource.setFileName(cursorR.getString(cursorR
-							.getColumnIndex("file_name")));
-					resource.setFilePath(cursorR.getString(cursorR
-							.getColumnIndex("file_path")));
-					list.add(resource);
+					String resource_id = String.valueOf(cursor.getInt(cursor
+							.getColumnIndex("resource_id")));
+
+					Cursor cursorR = db.rawQuery(
+							"select * from t_resource where id=?",
+							new String[] { resource_id });
+					if (cursorR.moveToLast()) {
+						resource.setFileName(cursorR.getString(cursorR
+								.getColumnIndex("file_name")));
+						resource.setFilePath(cursorR.getString(cursorR
+								.getColumnIndex("file_path")));
+						list.add(resource);
 					}
 				} while (cursor.moveToNext());
 			}
@@ -168,42 +177,64 @@ public class MemoDB {
 		values.put("remind_date", information.getRemindDate());
 		values.put("memo_finish", information.getMemoFinish());
 		values.put("create_date", information.getCreateDate());
-		
-		
-		Resource resource = list.get(0);
-		String oldRId = String.valueOf(resource.getId());
-		
-		resourceValues.put("file_name", resource.getFileName());
-		resourceValues.put("file_path", resource.getFilePath());
-		int k = (int) db.insert("t_resource", null, resourceValues);
-		Log.d("print", "" + k);
-		
 
-		db.beginTransaction();
-		try {
-			
+		if (list != null && list.size() != 0) {
+			Resource resource = list.get(0);
+			if (resource.getId() != 0) {
+				String oldRId = String.valueOf(resource.getId());
+				db.beginTransaction();
+				try {
+					resourceValues.put("file_name", resource.getFileName());
+					resourceValues.put("file_path", resource.getFilePath());
+					int q = db.update("t_resource", resourceValues, "id=?",
+							new String[] { oldRId });
+					Log.d("print", "" + q);
+					int p = db.update("t_information", values, "id=?",
+							new String[] { sid });
+					return p;
 
-			Cursor cursor = db.rawQuery(
-					"select max(id) as id  from t_resource", null);
-			if (cursor.moveToLast()) {
-				resourceId = cursor.getInt(cursor.getColumnIndex("id"));
+				} catch (Exception e) {
+					// TODO: handle exception
+					Log.e("transaction", "failed", e);
+				} finally {
+					db.endTransaction();
+				}
+			} else {
+				db.beginTransaction();
+				try {
+					resourceValues.put("file_name", resource.getFileName());
+					resourceValues.put("file_path", resource.getFilePath());
+					int k = (int) db.insert("t_resource", null, resourceValues);
+					Log.d("print", "" + k);
+					Cursor cursor = db.rawQuery(
+							"select max(id) as id  from t_resource", null);
+					if (cursor.moveToLast()) {
+						resourceId = cursor.getInt(cursor.getColumnIndex("id"));
+					}
+					String rId = String.valueOf(resourceId);
+					updateRId.put("memo_id", sid);
+					updateRId.put("resource_id", rId);
+					int q = (int) db.insert("t_info_resource", null, updateRId);
+					Log.d("print", "" + q);
+					int p = db.update("t_information", values, "id=?",
+							new String[] { sid });
+					return p;
+
+				} catch (Exception e) {
+					// TODO: handle exception
+					Log.e("transaction", "failed", e);
+				} finally {
+					db.endTransaction();
+				}
 
 			}
 
-			String rId = String.valueOf(resourceId);
-			updateRId.put("resource_id", rId);
-			int q = db.update("t_info_resource", updateRId, "resource_id=?",
-					new String[] { oldRId });
-			Log.d("print", "" + q);
+		} else {
 			int p = db.update("t_information", values, "id=?",
 					new String[] { sid });
 			return p;
-		} catch (Exception e) {
-			// TODO: handle exception
-			Log.e("transaction", "failed", e);
-		} finally {
-			db.endTransaction();
 		}
+
 		return -1;
 
 	}
