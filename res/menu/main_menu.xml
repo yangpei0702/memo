@@ -4,6 +4,6 @@
         android:id="@+id/add"
         android:orderInCategory="1"
         android:showAsAction="ifRoom|withText"
-        android:title="Add"/>
+        android:title="添 加"/>
 		
 </menu>

@@ -33,6 +33,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.yp.memo.R;
 import com.yp.memo.broadcastreceiver.AlarmReceiver;
@@ -65,6 +66,7 @@ public class AddActivity extends Activity implements OnClickListener {
 	private Information info;
 	private Resource resource;
 	private List<Resource> list;
+	private MemoDB m;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -86,11 +88,13 @@ public class AddActivity extends Activity implements OnClickListener {
 		
 		addPicButton.setOnClickListener(this);
 		addSoundButton.setOnClickListener(this);
-		setRemindButton.setOnClickListener(this);
+		//setRemindButton.setOnClickListener(this);
 		playAudio.setOnClickListener(this);
 		stopAudio.setOnClickListener(this);
 
 		info = new Information();
+		
+		m = MemoDB.getInstance(this);
 	}
 
 	@Override
@@ -112,9 +116,6 @@ public class AddActivity extends Activity implements OnClickListener {
 			finish();
 			return true;
 		case R.id.save:
-			
-			
-			
 			
 			AlertDialog.Builder dialog = new AlertDialog.Builder(
 					AddActivity.this);
@@ -162,14 +163,16 @@ public class AddActivity extends Activity implements OnClickListener {
 								resource.setFilePath(mAudioPath);
 								list.add(resource);
 							}
+							int ii = m.saveInformation(info, list);
+							Log.d("position", "" + ii);
+							Toast.makeText(getApplicationContext(), "保存成功",
+									Toast.LENGTH_SHORT).show();
+							finish();
 						}
 					});
 			dialog.show();
 
-			MemoDB m = MemoDB.getInstance(this);
-			int ii = m.saveInformation(info, list);
-			Log.d("position", "" + ii);
-			finish();
+			
 			
 
 		default:
@@ -206,7 +209,7 @@ public class AddActivity extends Activity implements OnClickListener {
 			mAudioPath = "mnt/sdcard/Music/" + audioFileName;
 			Intent intentAudio = new Intent(this, RecordActivity.class);
 			intentAudio.putExtra("Path", mAudioPath);
-			startActivityForResult(intentAudio, TAKE_AUDIO);// 启动相机程序
+			startActivityForResult(intentAudio, TAKE_AUDIO);
 			break;
 		/*case R.id.setRemind:
 			
@@ -278,6 +281,12 @@ public class AddActivity extends Activity implements OnClickListener {
 			timeInfo = new TimeInfo();
 			timeInfo = (TimeInfo) data.getSerializableExtra("timeInfo");
 			setReminder(true);
+			
+			int ii = m.saveInformation(info, list);
+			Log.d("position", "" + ii);
+			Toast.makeText(getApplicationContext(), "保存成功",
+					Toast.LENGTH_SHORT).show();
+			finish();
 		default:
 			break;
 		}

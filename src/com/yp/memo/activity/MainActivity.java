@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
@@ -24,7 +25,7 @@ public class MainActivity extends Activity {
 	private List<Information> list = null;
 	private ListView lv;
 	private InformationAdapter listAdapter;
-
+	private long exitTime = 0L;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -96,6 +97,18 @@ public class MainActivity extends Activity {
 
 			}
 		});
+	}
+	@Override
+	public void onBackPressed() {// 覆盖返回键,2秒内连续按2次返回键，就退出应用
+		// TODO Auto-generated method stub
+		long curTime = System.currentTimeMillis();
+		if (curTime - exitTime <= 2000) {
+			finish();
+		} else {
+			Toast.makeText(getApplicationContext(), "再按一次退出备忘录",
+					Toast.LENGTH_SHORT).show();
+			exitTime = curTime;
+		}
 	}
 
 }

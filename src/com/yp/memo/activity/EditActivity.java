@@ -62,6 +62,8 @@ public class EditActivity extends Activity implements OnClickListener {
 		imageView = (ImageView) findViewById(R.id.picImage);
 		addPicButton = (Button) findViewById(R.id.addPic);
 		addPicButton.setOnClickListener(this);
+		addSoundButton= (Button) findViewById(R.id.addSound);
+		addSoundButton.setText("ÐÞ¸ÄÉùÒô");
 
 		intent = this.getIntent();
 		info = (Information) intent.getSerializableExtra("info");
